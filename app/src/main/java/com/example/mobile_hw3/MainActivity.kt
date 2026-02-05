@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import coil3.compose.AsyncImage
 import com.example.mobile_hw3.ui.theme.Mobile_hw3Theme
 
 class MainActivity : ComponentActivity() {
@@ -32,6 +33,10 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
+    AsyncImage(
+        model = "https://example.com/image.jpg",
+        contentDescription = null,
+    )
     Text(
         text = "Hello $name!",
         modifier = modifier
