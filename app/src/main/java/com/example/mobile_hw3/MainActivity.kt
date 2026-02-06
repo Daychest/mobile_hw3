@@ -80,6 +80,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
@@ -89,6 +90,7 @@ import com.example.mobile_hw3.viewModel.NoteViewModel
 import com.example.mobile_hw3.viewModel.Repository
 
 class MainActivity : ComponentActivity() {
+    val lifecycleOwner: LifecycleOwner = this
     private val db by lazy {
         Room.databaseBuilder(
             applicationContext,
@@ -110,7 +112,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Mobile_hw3Theme {
-                Navigation(viewModel)
+                Navigation(viewModel, this)
             }
         }
     }
@@ -121,7 +123,7 @@ const val messageScreenRoute = "messageScreen"
 const val settingsScreenRoute = "settingsScreen"
 
 @Composable
-fun Navigation(viewModel: NoteViewModel) {
+fun Navigation(viewModel: NoteViewModel, lifecycleOwner: LifecycleOwner) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = mainScreenRoute) {
         composable(route = mainScreenRoute) {
@@ -131,13 +133,14 @@ fun Navigation(viewModel: NoteViewModel) {
             MessageScreen(navController = navController)
         }
         composable(route = settingsScreenRoute) {
-            SettingsScreen(navController = navController, viewModel)
+            SettingsScreen(navController = navController, viewModel, lifecycleOwner)
         }
     }
 }
 
 @Composable
 fun MainScreen(navController: NavController) {
+
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -209,7 +212,7 @@ fun MessageScreen(navController: NavController) {
 }
 
 @Composable
-fun SettingsScreen(navController: NavController, viewModel: NoteViewModel) {
+fun SettingsScreen(navController: NavController, viewModel: NoteViewModel, lifecycleOwner: LifecycleOwner) {
     var selectedImageUri by remember {
         mutableStateOf<Uri?>(null)
     }
@@ -226,6 +229,12 @@ fun SettingsScreen(navController: NavController, viewModel: NoteViewModel) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        var noteList by remember {
+            mutableStateOf(listOf<Note>())
+        }
+        viewModel.getNotes().observe(lifecycleOwner){
+            noteList = it
+        }
         var name by remember {
             mutableStateOf("")
         }
@@ -252,9 +261,9 @@ fun SettingsScreen(navController: NavController, viewModel: NoteViewModel) {
         }) {
             AsyncProfilePicture(selectedImageUri)
         }
-        var username by remember {  mutableStateOf("") }
-        TextField(value = username, onValueChange = {newText->
-            username = newText
+        //var username by remember {  mutableStateOf("") }
+        TextField(value = name, onValueChange = {newText->
+            name = newText
         },
         label = {Text(text = "Username")})
         Button(
