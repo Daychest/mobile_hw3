@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.mobile_hw3.ui.theme.Mobile_hw3Theme
 import android.net.Uri
+import android.util.Log
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
@@ -91,8 +92,6 @@ import com.example.mobile_hw3.viewModel.Repository
 import androidx.core.net.toUri
 
 
-var testing = false
-
 class MainActivity : ComponentActivity() {
     val lifecycleOwner: LifecycleOwner = this
     private val db by lazy {
@@ -111,6 +110,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -216,8 +216,16 @@ fun MessageScreen(navController: NavController) {
 }
 
 @Composable
-fun SettingsScreen(navController: NavController, viewModel: NoteViewModel, lifecycleOwner: LifecycleOwner) {
+fun SettingsScreen(
+    navController: NavController,
+    viewModel: NoteViewModel,
+    lifecycleOwner: LifecycleOwner
+) {
     var name by remember {
+        mutableStateOf("")
+    }
+
+    var testName by remember {
         mutableStateOf("")
     }
 
@@ -232,7 +240,8 @@ fun SettingsScreen(navController: NavController, viewModel: NoteViewModel, lifec
         onResult = { uri ->
             selectedImageUri = uri
             body = uri.toString()
-            testing = true
+            testName = uri.toString()
+            Log.d("FFFFFFFF", "Image changed")
         }
     )
     Column(
@@ -247,7 +256,7 @@ fun SettingsScreen(navController: NavController, viewModel: NoteViewModel, lifec
         }
 
 
-        viewModel.getNotes().observe(lifecycleOwner){
+        viewModel.getNotes().observe(lifecycleOwner) {
             noteList = it
         }
 
@@ -256,19 +265,17 @@ fun SettingsScreen(navController: NavController, viewModel: NoteViewModel, lifec
             body
         )
         LazyColumn() {
-            items(noteList){note->
-                name = note.noteName
-                if (name == "test")
-                {
-                    testing = true
-                }
-                selectedImageUri = note.noteBody.toUri()
+            items(noteList) { note ->
+                //name = note.noteName
+                //testName = note.noteBody
+                Log.d("BBBBBBBBBBBB", note.noteBody)
+                //selectedImageUri = note.noteBody.toUri()
                 //AsyncProfilePicture(Uri.parse(note.noteBody))
-                testing = note.noteBody != ""
             }
         }
         Button(onClick = {
             viewModel.upsertNote(note)
+            testName = "content://media/picker/0/com.android.providers.media.photopicker/media/41"
         }) {
             Text(text = "set data")
         }
@@ -281,17 +288,22 @@ fun SettingsScreen(navController: NavController, viewModel: NoteViewModel, lifec
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
             )
         }) {
-            if (testing) {
-                ProfilePicture(R.drawable.test)
-            }else{
-                AsyncProfilePicture(selectedImageUri)
-            }
+            //testName = "content://media/picker/0/com.android.providers.media.photopicker/media/41"
+            AsyncImage(
+                model = testName.toUri(),
+                contentDescription = "",
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .border(1.5.dp, MaterialTheme.colorScheme.secondary, CircleShape)
+            )
         }
         //var username by remember {  mutableStateOf("") }
-        TextField(value = name, onValueChange = {newText->
-            name = newText
-        },
-        label = {Text(text = "Username")})
+        TextField(
+            value = name, onValueChange = { newText ->
+                name = newText
+            },
+            label = { Text(text = "Username") })
         Button(
             onClick = {
                 navController.popBackStack()
@@ -334,11 +346,7 @@ fun ProfilePicture(picture: Int) {
 @Composable
 fun MessageCard(msg: Message) {
     Row(modifier = Modifier.padding(all = 8.dp)) {
-        if (testing) {
-            ProfilePicture(R.drawable.test)
-        }else{
-            ProfilePicture(R.drawable.whiteness)
-        }
+        ProfilePicture(R.drawable.whiteness)
         Spacer(modifier = Modifier.width(8.dp))
 
         // We keep track if the message is expanded or not in this
@@ -351,12 +359,8 @@ fun MessageCard(msg: Message) {
 
         // We toggle the isExpanded variable when we click on this Column
         Column(modifier = Modifier.clickable { isExpanded = !isExpanded }) {
-            var a = msg.author
-            if (testing){
-                a = "test"
-            }
             Text(
-                    text = a,
+                text = msg.author,
                 color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.titleSmall
             )
