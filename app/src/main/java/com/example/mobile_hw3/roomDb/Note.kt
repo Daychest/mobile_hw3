@@ -1,5 +1,6 @@
 package com.example.mobile_hw3.roomDb
 
+import android.net.Uri
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 

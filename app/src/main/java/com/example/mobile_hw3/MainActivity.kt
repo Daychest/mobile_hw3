@@ -88,6 +88,10 @@ import com.example.mobile_hw3.roomDb.Note
 import com.example.mobile_hw3.roomDb.NoteDatabase
 import com.example.mobile_hw3.viewModel.NoteViewModel
 import com.example.mobile_hw3.viewModel.Repository
+import androidx.core.net.toUri
+
+
+var testing = false
 
 class MainActivity : ComponentActivity() {
     val lifecycleOwner: LifecycleOwner = this
@@ -227,7 +231,8 @@ fun SettingsScreen(navController: NavController, viewModel: NoteViewModel, lifec
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
             selectedImageUri = uri
-            body = uri
+            body = uri.toString()
+            testing = true
         }
     )
     Column(
@@ -253,6 +258,13 @@ fun SettingsScreen(navController: NavController, viewModel: NoteViewModel, lifec
         LazyColumn() {
             items(noteList){note->
                 name = note.noteName
+                if (name == "test")
+                {
+                    testing = true
+                }
+                selectedImageUri = note.noteBody.toUri()
+                //AsyncProfilePicture(Uri.parse(note.noteBody))
+                testing = note.noteBody != ""
             }
         }
         Button(onClick = {
@@ -269,7 +281,11 @@ fun SettingsScreen(navController: NavController, viewModel: NoteViewModel, lifec
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
             )
         }) {
-            AsyncProfilePicture(selectedImageUri)
+            if (testing) {
+                ProfilePicture(R.drawable.test)
+            }else{
+                AsyncProfilePicture(selectedImageUri)
+            }
         }
         //var username by remember {  mutableStateOf("") }
         TextField(value = name, onValueChange = {newText->
@@ -318,7 +334,11 @@ fun ProfilePicture(picture: Int) {
 @Composable
 fun MessageCard(msg: Message) {
     Row(modifier = Modifier.padding(all = 8.dp)) {
-        ProfilePicture(R.drawable.reaction)
+        if (testing) {
+            ProfilePicture(R.drawable.test)
+        }else{
+            ProfilePicture(R.drawable.whiteness)
+        }
         Spacer(modifier = Modifier.width(8.dp))
 
         // We keep track if the message is expanded or not in this
@@ -331,8 +351,12 @@ fun MessageCard(msg: Message) {
 
         // We toggle the isExpanded variable when we click on this Column
         Column(modifier = Modifier.clickable { isExpanded = !isExpanded }) {
+            var a = msg.author
+            if (testing){
+                a = "test"
+            }
             Text(
-                text = msg.author,
+                    text = a,
                 color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.titleSmall
             )
