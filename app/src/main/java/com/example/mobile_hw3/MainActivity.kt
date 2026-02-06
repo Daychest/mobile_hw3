@@ -23,11 +23,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import coil3.Uri
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
-import coil3.request.crossfade
 import com.example.mobile_hw3.ui.theme.Mobile_hw3Theme
+import android.net.Uri
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,18 +58,77 @@ class MainActivity : ComponentActivity() {
                     }
                     val singleImagePickerLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.PickVisualMedia(),
-                        onResult = {uri ->
+                        onResult = { uri ->
                             selectedImageUri = uri
-
                         }
                     )
                     val multipleImagePickerLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.PickMultipleVisualMedia(),
-                        onResult = {uriList ->
+                        onResult = { uriList ->
                             selectedImageUriList = uriList
-
                         }
                     )
+
+                    Column(Modifier.fillMaxSize()) {
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceAround
+                        ) {
+                            Button(onClick = {
+                                singleImagePickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            }) {
+                                Text(text = "pick single Image")
+                            }
+                            Button(onClick = {
+                                multipleImagePickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            }) {
+                                Text(text = "pick multiple Images")
+                            }
+                        }
+                        LazyColumn(
+                            Modifier
+                                .fillMaxSize()
+                                .padding(12.dp)
+                        ) {
+                            item {
+                                AsyncImage(
+                                    model = selectedImageUri,
+                                    contentDescription = "",
+                                    Modifier.fillMaxWidth(),
+                                    contentScale = ContentScale.Crop
+                                )
+                                Divider(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
+                                )
+                                Divider(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
+                                )
+                            }
+                            items(selectedImageUriList) { uri ->
+                                AsyncImage(
+                                    model = uri,
+                                    contentDescription = "",
+                                    Modifier.fillMaxWidth(),
+                                    contentScale = ContentScale.Crop
+                                )
+                                Divider(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -55,5 +55,5 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     //Compose UI
-    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+    implementation("io.coil-kt:coil-compose:2.4.0")
 }
