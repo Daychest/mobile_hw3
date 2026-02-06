@@ -3,7 +3,7 @@ package com.example.mobile_hw3.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.test.roomDb.Note
+import com.example.mobile_hw3.roomDb.Note
 import kotlinx.coroutines.launch
 
 class NoteViewModel(private val repository: Repository): ViewModel() {
