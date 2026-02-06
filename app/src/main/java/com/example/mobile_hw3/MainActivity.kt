@@ -62,81 +62,27 @@ fun MainScreen() {
         var selectedImageUri by remember {
             mutableStateOf<Uri?>(null)
         }
-        var selectedImageUriList by remember {
-            mutableStateOf<List<Uri>>(emptyList())
-        }
         val singleImagePickerLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickVisualMedia(),
             onResult = { uri ->
                 selectedImageUri = uri
             }
         )
-        val multipleImagePickerLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.PickMultipleVisualMedia(),
-            onResult = { uriList ->
-                selectedImageUriList = uriList
-            }
-        )
 
         Column(Modifier.fillMaxSize()) {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                Button(onClick = {
-                    singleImagePickerLauncher.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                    )
-                }) {
-                    Text(text = "pick single Image")
-                }
-                Button(onClick = {
-                    multipleImagePickerLauncher.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                    )
-                }) {
-                    Text(text = "pick multiple Images")
-                }
+            Button(onClick = {
+                singleImagePickerLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            }) {
+                Text(text = "pick single Image")
             }
-            LazyColumn(
-                Modifier
-                    .fillMaxSize()
-                    .padding(12.dp)
-            ) {
-                item {
-                    AsyncImage(
-                        model = selectedImageUri,
-                        contentDescription = "",
-                        Modifier.fillMaxWidth(),
-                        contentScale = ContentScale.Crop
-                    )
-                    Divider(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                    )
-                    Divider(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                    )
-                }
-                items(selectedImageUriList) { uri ->
-                    AsyncImage(
-                        model = uri,
-                        contentDescription = "",
-                        Modifier.fillMaxWidth(),
-                        contentScale = ContentScale.Crop
-                    )
-                    Divider(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                    )
-                }
-            }
+            AsyncImage(
+                model = selectedImageUri,
+                contentDescription = "",
+                Modifier.fillMaxWidth(),
+                contentScale = ContentScale.Crop
+            )
         }
     }
 }
