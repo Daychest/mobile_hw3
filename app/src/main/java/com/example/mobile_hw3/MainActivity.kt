@@ -65,7 +65,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Mobile_hw3Theme {
-                Test()
+                Navigation()
             }
         }
     }
@@ -166,6 +166,15 @@ fun MessageScreen(navController: NavController) {
 
 @Composable
 fun SettingsScreen(navController: NavController) {
+    var selectedImageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+    val singleImagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            selectedImageUri = uri
+        }
+    )
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -174,9 +183,16 @@ fun SettingsScreen(navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "No Settings",
+            text = "User:",
             fontSize = 40.sp,
         )
+        Column(modifier = Modifier.clickable {
+            singleImagePickerLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        }) {
+            AsyncProfilePicture(selectedImageUri)
+        }
         Button(
             onClick = {
                 navController.popBackStack()
@@ -191,6 +207,18 @@ fun SettingsScreen(navController: NavController) {
 }
 
 data class Message(val author: String, val body: String)
+
+@Composable
+fun AsyncProfilePicture(selectedImageUri: Any?) {
+    AsyncImage(
+        model = selectedImageUri,
+        contentDescription = "",
+        modifier = Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .border(1.5.dp, MaterialTheme.colorScheme.secondary, CircleShape)
+    )
+}
 
 @Composable
 fun ProfilePicture(picture: Int) {
