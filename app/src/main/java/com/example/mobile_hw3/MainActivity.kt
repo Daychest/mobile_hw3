@@ -46,117 +46,97 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Mobile_hw3Theme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    var selectedImageUri by remember {
-                        mutableStateOf<Uri?>(null)
-                    }
-                    var selectedImageUriList by remember {
-                        mutableStateOf<List<Uri>>(emptyList())
-                    }
-                    val singleImagePickerLauncher = rememberLauncherForActivityResult(
-                        contract = ActivityResultContracts.PickVisualMedia(),
-                        onResult = { uri ->
-                            selectedImageUri = uri
-                        }
-                    )
-                    val multipleImagePickerLauncher = rememberLauncherForActivityResult(
-                        contract = ActivityResultContracts.PickMultipleVisualMedia(),
-                        onResult = { uriList ->
-                            selectedImageUriList = uriList
-                        }
-                    )
-
-                    Column(Modifier.fillMaxSize()) {
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            horizontalArrangement = Arrangement.SpaceAround
-                        ) {
-                            Button(onClick = {
-                                singleImagePickerLauncher.launch(
-                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                )
-                            }) {
-                                Text(text = "pick single Image")
-                            }
-                            Button(onClick = {
-                                multipleImagePickerLauncher.launch(
-                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                )
-                            }) {
-                                Text(text = "pick multiple Images")
-                            }
-                        }
-                        LazyColumn(
-                            Modifier
-                                .fillMaxSize()
-                                .padding(12.dp)
-                        ) {
-                            item {
-                                AsyncImage(
-                                    model = selectedImageUri,
-                                    contentDescription = "",
-                                    Modifier.fillMaxWidth(),
-                                    contentScale = ContentScale.Crop
-                                )
-                                Divider(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(8.dp)
-                                )
-                                Divider(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(8.dp)
-                                )
-                            }
-                            items(selectedImageUriList) { uri ->
-                                AsyncImage(
-                                    model = uri,
-                                    contentDescription = "",
-                                    Modifier.fillMaxWidth(),
-                                    contentScale = ContentScale.Crop
-                                )
-                                Divider(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(8.dp)
-                                )
-                            }
-                        }
-                    }
-                }
+                MainScreen()
             }
         }
     }
 }
 
+@Preview
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data("https://example.com/image.jpg")
-            .crossfade(true)
-            .build(),
-        placeholder = painterResource(R.drawable.reaction),
-        contentDescription = stringResource(R.string.app_name),
-        contentScale = ContentScale.Crop,
-        modifier = Modifier.clip(CircleShape),
-    )
-//    Text(
-//        text = "Hello $name!",
-//        modifier = modifier
-//    )
-}
+fun MainScreen() {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        var selectedImageUri by remember {
+            mutableStateOf<Uri?>(null)
+        }
+        var selectedImageUriList by remember {
+            mutableStateOf<List<Uri>>(emptyList())
+        }
+        val singleImagePickerLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickVisualMedia(),
+            onResult = { uri ->
+                selectedImageUri = uri
+            }
+        )
+        val multipleImagePickerLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickMultipleVisualMedia(),
+            onResult = { uriList ->
+                selectedImageUriList = uriList
+            }
+        )
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Mobile_hw3Theme {
-        Greeting("Android")
+        Column(Modifier.fillMaxSize()) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                Button(onClick = {
+                    singleImagePickerLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                }) {
+                    Text(text = "pick single Image")
+                }
+                Button(onClick = {
+                    multipleImagePickerLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                }) {
+                    Text(text = "pick multiple Images")
+                }
+            }
+            LazyColumn(
+                Modifier
+                    .fillMaxSize()
+                    .padding(12.dp)
+            ) {
+                item {
+                    AsyncImage(
+                        model = selectedImageUri,
+                        contentDescription = "",
+                        Modifier.fillMaxWidth(),
+                        contentScale = ContentScale.Crop
+                    )
+                    Divider(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    )
+                    Divider(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    )
+                }
+                items(selectedImageUriList) { uri ->
+                    AsyncImage(
+                        model = uri,
+                        contentDescription = "",
+                        Modifier.fillMaxWidth(),
+                        contentScale = ContentScale.Crop
+                    )
+                    Divider(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    )
+                }
+            }
+        }
     }
 }
