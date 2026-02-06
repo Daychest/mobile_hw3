@@ -213,6 +213,13 @@ fun MessageScreen(navController: NavController) {
 
 @Composable
 fun SettingsScreen(navController: NavController, viewModel: NoteViewModel, lifecycleOwner: LifecycleOwner) {
+    var name by remember {
+        mutableStateOf("")
+    }
+
+    var body by remember {
+        mutableStateOf("")
+    }
     var selectedImageUri by remember {
         mutableStateOf<Uri?>(null)
     }
@@ -220,6 +227,7 @@ fun SettingsScreen(navController: NavController, viewModel: NoteViewModel, lifec
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
             selectedImageUri = uri
+            body = uri
         }
     )
     Column(
@@ -232,19 +240,21 @@ fun SettingsScreen(navController: NavController, viewModel: NoteViewModel, lifec
         var noteList by remember {
             mutableStateOf(listOf<Note>())
         }
+
+
         viewModel.getNotes().observe(lifecycleOwner){
             noteList = it
         }
-        var name by remember {
-            mutableStateOf("")
-        }
-        var body by remember {
-            mutableStateOf("")
-        }
+
         val note = Note(
             name,
             body
         )
+        LazyColumn() {
+            items(noteList){note->
+                name = note.noteName
+            }
+        }
         Button(onClick = {
             viewModel.upsertNote(note)
         }) {
