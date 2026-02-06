@@ -1,4 +1,4 @@
-package com.example.test.roomDb
+package com.example.mobile_hw3.roomDb
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

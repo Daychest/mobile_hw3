@@ -1,4 +1,4 @@
-package com.example.test.viewModel
+package com.example.mobile_hw3.viewModel
 
 import androidx.room.Delete
 import androidx.room.Query
