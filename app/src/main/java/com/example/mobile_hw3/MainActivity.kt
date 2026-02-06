@@ -193,6 +193,11 @@ fun SettingsScreen(navController: NavController) {
         }) {
             AsyncProfilePicture(selectedImageUri)
         }
+        var username by remember {  mutableStateOf("") }
+        TextField(value = username, onValueChange = {newText->
+            username = newText
+        },
+        label = {Text(text = "Username")})
         Button(
             onClick = {
                 navController.popBackStack()
