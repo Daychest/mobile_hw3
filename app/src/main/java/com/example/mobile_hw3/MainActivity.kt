@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,7 +21,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.mobile_hw3.ui.theme.Mobile_hw3Theme
 import android.net.Uri
@@ -34,7 +32,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -46,42 +43,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -131,6 +105,24 @@ const val settingsScreenRoute = "settingsScreen"
 
 @Composable
 fun Navigation(viewModel: NoteViewModel, lifecycleOwner: LifecycleOwner) {
+    var imageUriState = remember {
+        mutableStateOf<Uri?>(null)
+    }
+    var usernameState = remember {
+        mutableStateOf<String>("")
+    }
+    var noteList by remember {
+        mutableStateOf(listOf<Note>())
+    }
+    viewModel.getNotes().observe(lifecycleOwner) {
+        noteList = it
+    }
+    if (noteList.isNotEmpty()) {
+        Log.d("", "Loaded from note list")
+        imageUriState.value = noteList[0].noteBody.toUri()
+        usernameState.value = noteList[0].noteName
+    }
+
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = mainScreenRoute) {
         composable(route = mainScreenRoute) {
@@ -140,7 +132,13 @@ fun Navigation(viewModel: NoteViewModel, lifecycleOwner: LifecycleOwner) {
             MessageScreen(navController = navController)
         }
         composable(route = settingsScreenRoute) {
-            SettingsScreen(navController = navController, viewModel, lifecycleOwner)
+            SettingsScreen(
+                navController = navController,
+                viewModel,
+                lifecycleOwner,
+                imageUriState,
+                usernameState
+            )
         }
     }
 }
@@ -222,39 +220,27 @@ fun MessageScreen(navController: NavController) {
 fun SettingsScreen(
     navController: NavController,
     viewModel: NoteViewModel,
-    lifecycleOwner: LifecycleOwner
+    lifecycleOwner: LifecycleOwner,
+    imageUriState: MutableState<Uri?>,
+    usernameState: MutableState<String>
 ) {
     Log.d("", "SettingsScreen called")
-    var noteList by remember {
-        mutableStateOf(listOf<Note>())
-    }
-    viewModel.getNotes().observe(lifecycleOwner){
-        noteList = it
-    }
-
 
 
     val context = LocalContext.current
-
-    var rememberedImageStr by remember {
-        mutableStateOf<String>("")
-    }
-    if (noteList.isNotEmpty()){
-        Log.d("", "Loaded from note list")
-        rememberedImageStr = noteList[0].noteBody
-    }
-
 
 
     val singleImagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
-            rememberedImageStr = uri.toString()
+            imageUriState.value = uri
             Log.d("", "Image changed")
-            context.contentResolver.takePersistableUriPermission(
-                rememberedImageStr.toUri(),
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
+            if (uri != null) {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
         }
     )
     Column(
@@ -273,20 +259,8 @@ fun SettingsScreen(
             Text(text = "pick image")
         }
         Button(onClick = {
-            Log.d("", "str button hit")
-            rememberedImageStr = "content://media/picker/0/com.android.providers.media.photopicker/media/41"
-
-
-            context.contentResolver.takePersistableUriPermission(
-                rememberedImageStr.toUri(),
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
-        }) {
-            Text(text = "set as string")
-        }
-        Button(onClick = {
             Log.d("", "save button hit")
-            val note: Note = Note("TestName", rememberedImageStr, 0)
+            val note: Note = Note(usernameState.value, imageUriState.value.toString(), 0)
             viewModel.upsertNote(note)
         }) {
             Text(text = "save")
@@ -294,12 +268,10 @@ fun SettingsScreen(
 
 
 
-        AsyncProfilePicture(rememberedImageStr)
-        //var username by remember {  mutableStateOf("") }
-        var textFieldText = ""
+        AsyncProfilePicture(imageUriState.value)
         TextField(
-            value = textFieldText, onValueChange = { newText ->
-                textFieldText = newText
+            value = usernameState.value, onValueChange = { newText: String ->
+                usernameState.value = newText
             },
             label = { Text(text = "Username") })
         Button(
@@ -319,10 +291,10 @@ fun SettingsScreen(
 data class Message(val author: String, val body: String)
 
 @Composable
-fun AsyncProfilePicture(str: String) {
+fun AsyncProfilePicture(uri: Uri?) {
     Log.d("", "AsyncImage triggered")
     AsyncImage(
-        model = str.toUri(),
+        model = uri,
         contentDescription = "",
         modifier = Modifier
             .size(40.dp)
