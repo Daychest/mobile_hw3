@@ -56,6 +56,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import androidx.activity.viewModels
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -65,6 +66,7 @@ import com.example.mobile_hw3.roomDb.NoteDatabase
 import com.example.mobile_hw3.viewModel.NoteViewModel
 import com.example.mobile_hw3.viewModel.Repository
 import androidx.core.net.toUri
+import java.nio.file.WatchEvent
 
 var imageStr: String = ""
 
@@ -138,7 +140,6 @@ fun Navigation(viewModel: NoteViewModel, lifecycleOwner: LifecycleOwner) {
             SettingsScreen(
                 navController = navController,
                 viewModel,
-                lifecycleOwner,
                 imageUriState,
                 usernameState
             )
@@ -226,21 +227,16 @@ fun MessageScreen(
 fun SettingsScreen(
     navController: NavController,
     viewModel: NoteViewModel,
-    lifecycleOwner: LifecycleOwner,
     imageUriState: MutableState<Uri?>,
     usernameState: MutableState<String>
 ) {
-    Log.d("", "SettingsScreen called")
-
-
     val context = LocalContext.current
-
 
     val singleImagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
             imageUriState.value = uri
-            Log.d("", "Image changed")
+
             if (uri != null) {
                 context.contentResolver.takePersistableUriPermission(
                     uri,
@@ -257,24 +253,20 @@ fun SettingsScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Button(onClick = {
-            Log.d("", "button hit")
-            singleImagePickerLauncher.launch(
-                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-            )
-        }) {
-            Text(text = "pick image")
-        }
-        Button(onClick = {
-            Log.d("", "save button hit")
             val note: Note = Note(usernameState.value, imageUriState.value.toString(), 0)
             viewModel.upsertNote(note)
         }) {
-            Text(text = "save")
+            Text(text = "set data")
         }
 
+        Column(modifier = Modifier.clickable(onClick = {
+            singleImagePickerLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        })) {
+            AsyncProfilePicture(imageUriState.value)
+        }
 
-
-        AsyncProfilePicture(imageUriState.value)
         TextField(
             value = usernameState.value, onValueChange = { newText: String ->
                 usernameState.value = newText
@@ -373,41 +365,6 @@ fun Conversation(messages: List<Message>, uri: Uri?, username: String) {
     LazyColumn {
         items(messages) { message ->
             MessageCard(message, uri, username)
-        }
-    }
-}
-
-@Preview
-@Composable
-fun Test() {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        var selectedImageUri by remember {
-            mutableStateOf<Uri?>(null)
-        }
-        val singleImagePickerLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.PickVisualMedia(),
-            onResult = { uri ->
-                selectedImageUri = uri
-            }
-        )
-
-        Column(Modifier.fillMaxSize()) {
-            Button(onClick = {
-                singleImagePickerLauncher.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                )
-            }) {
-                Text(text = "pick single Image")
-            }
-            AsyncImage(
-                model = selectedImageUri,
-                contentDescription = "",
-                Modifier.fillMaxWidth(),
-                contentScale = ContentScale.Crop
-            )
         }
     }
 }
