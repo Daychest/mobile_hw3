@@ -129,7 +129,10 @@ fun Navigation(viewModel: NoteViewModel, lifecycleOwner: LifecycleOwner) {
             MainScreen(navController = navController)
         }
         composable(route = messageScreenRoute) {
-            MessageScreen(navController = navController)
+            MessageScreen(
+                navController = navController, imageUriState.value,
+                usernameState.value
+            )
         }
         composable(route = settingsScreenRoute) {
             SettingsScreen(
@@ -179,7 +182,10 @@ fun MainScreen(navController: NavController) {
 
 
 @Composable
-fun MessageScreen(navController: NavController) {
+fun MessageScreen(
+    navController: NavController, uri: Uri?,
+    username: String
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -211,7 +217,7 @@ fun MessageScreen(navController: NavController) {
             }
         }
         Mobile_hw3Theme() {
-            Conversation(SampleData.conversationSample)
+            Conversation(SampleData.conversationSample, uri, username)
         }
     }
 }
@@ -316,9 +322,9 @@ fun ProfilePicture(picture: Int) {
 }
 
 @Composable
-fun MessageCard(msg: Message) {
+fun MessageCard(msg: Message, uri: Uri?, username: String) {
     Row(modifier = Modifier.padding(all = 8.dp)) {
-        ProfilePicture(R.drawable.whiteness)
+        AsyncProfilePicture(uri)
         Spacer(modifier = Modifier.width(8.dp))
 
         // We keep track if the message is expanded or not in this
@@ -332,7 +338,7 @@ fun MessageCard(msg: Message) {
         // We toggle the isExpanded variable when we click on this Column
         Column(modifier = Modifier.clickable { isExpanded = !isExpanded }) {
             Text(
-                text = msg.author,
+                text = username,
                 color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.titleSmall
             )
@@ -363,10 +369,10 @@ fun MessageCard(msg: Message) {
 }
 
 @Composable
-fun Conversation(messages: List<Message>) {
+fun Conversation(messages: List<Message>, uri: Uri?, username: String) {
     LazyColumn {
         items(messages) { message ->
-            MessageCard(message)
+            MessageCard(message, uri, username)
         }
     }
 }
