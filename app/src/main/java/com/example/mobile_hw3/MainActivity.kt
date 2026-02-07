@@ -233,7 +233,11 @@ fun SettingsScreen(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
             rememberedImageStr = uri.toString()
-            Log.d("FFFFFFFF", "Image changed")
+            Log.d("", "Image changed")
+            context.contentResolver.takePersistableUriPermission(
+                rememberedImageStr.toUri(),
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
         }
     )
     Column(
