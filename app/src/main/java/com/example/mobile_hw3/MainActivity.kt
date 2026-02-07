@@ -1,5 +1,6 @@
 package com.example.mobile_hw3
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -91,9 +92,11 @@ import com.example.mobile_hw3.viewModel.NoteViewModel
 import com.example.mobile_hw3.viewModel.Repository
 import androidx.core.net.toUri
 
+var imageStr: String = ""
+
 
 class MainActivity : ComponentActivity() {
-    val lifecycleOwner: LifecycleOwner = this
+
     private val db by lazy {
         Room.databaseBuilder(
             applicationContext,
@@ -221,26 +224,15 @@ fun SettingsScreen(
     viewModel: NoteViewModel,
     lifecycleOwner: LifecycleOwner
 ) {
-    var name by remember {
-        mutableStateOf("")
-    }
+    val context = LocalContext.current
 
-    var testName by remember {
-        mutableStateOf("")
-    }
-
-    var body by remember {
-        mutableStateOf("")
-    }
-    var selectedImageUri by remember {
-        mutableStateOf<Uri?>(null)
+    var rememberedImageStr by remember {
+        mutableStateOf<String>("")
     }
     val singleImagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
-            selectedImageUri = uri
-            body = uri.toString()
-            testName = uri.toString()
+            rememberedImageStr = uri.toString()
             Log.d("FFFFFFFF", "Image changed")
         }
     )
@@ -251,57 +243,35 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        var noteList by remember {
-            mutableStateOf(listOf<Note>())
-        }
-
-
-        viewModel.getNotes().observe(lifecycleOwner) {
-            noteList = it
-        }
-
-        val note = Note(
-            name,
-            body
-        )
-        LazyColumn() {
-            items(noteList) { note ->
-                //name = note.noteName
-                //testName = note.noteBody
-                Log.d("BBBBBBBBBBBB", note.noteBody)
-                //selectedImageUri = note.noteBody.toUri()
-                //AsyncProfilePicture(Uri.parse(note.noteBody))
-            }
-        }
         Button(onClick = {
-            viewModel.upsertNote(note)
-            testName = "content://media/picker/0/com.android.providers.media.photopicker/media/41"
-        }) {
-            Text(text = "set data")
-        }
-        Text(
-            text = "User:",
-            fontSize = 40.sp,
-        )
-        Column(modifier = Modifier.clickable {
+            Log.d("", "button hit")
             singleImagePickerLauncher.launch(
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
             )
         }) {
-            //testName = "content://media/picker/0/com.android.providers.media.photopicker/media/41"
-            AsyncImage(
-                model = testName.toUri(),
-                contentDescription = "",
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .border(1.5.dp, MaterialTheme.colorScheme.secondary, CircleShape)
-            )
+            Text(text = "pick image")
         }
+        Button(onClick = {
+            Log.d("", "str button hit")
+            rememberedImageStr = "content://media/picker/0/com.android.providers.media.photopicker/media/41"
+
+
+            context.contentResolver.takePersistableUriPermission(
+                rememberedImageStr.toUri(),
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        }) {
+            Text(text = "set as string")
+        }
+
+
+
+        AsyncProfilePicture(rememberedImageStr)
         //var username by remember {  mutableStateOf("") }
+        var textFieldText = ""
         TextField(
-            value = name, onValueChange = { newText ->
-                name = newText
+            value = textFieldText, onValueChange = { newText ->
+                textFieldText = newText
             },
             label = { Text(text = "Username") })
         Button(
@@ -314,15 +284,17 @@ fun SettingsScreen(
         ) {
             Text(text = "Back")
         }
+
     }
 }
 
 data class Message(val author: String, val body: String)
 
 @Composable
-fun AsyncProfilePicture(selectedImageUri: Any?) {
+fun AsyncProfilePicture(str: String) {
+    Log.d("", "AsyncImage triggered")
     AsyncImage(
-        model = selectedImageUri,
+        model = str.toString(),
         contentDescription = "",
         modifier = Modifier
             .size(40.dp)
