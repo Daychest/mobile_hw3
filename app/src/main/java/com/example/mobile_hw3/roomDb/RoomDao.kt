@@ -3,18 +3,17 @@ package com.example.mobile_hw3.roomDb
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
-import androidx.room.Update
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RoomDao {
     @Upsert
-    suspend fun upsertNote(note: Note)
+    suspend fun upsertNote(user: User)
 
     @Delete
-    suspend fun deleteNote(note: Note)
+    suspend fun deleteNote(user: User)
 
-    @Query("SELECT * FROM Note")
-    fun getAllNotes(): Flow<List<Note>>
+    @Query("SELECT * FROM User")
+    fun getAllNotes(): Flow<List<User>>
 }

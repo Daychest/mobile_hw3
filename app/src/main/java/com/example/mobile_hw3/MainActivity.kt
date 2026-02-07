@@ -18,10 +18,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.mobile_hw3.ui.theme.Mobile_hw3Theme
 import android.net.Uri
 import android.util.Log
@@ -56,17 +54,15 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import androidx.activity.viewModels
 import androidx.compose.runtime.MutableState
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
-import com.example.mobile_hw3.roomDb.Note
-import com.example.mobile_hw3.roomDb.NoteDatabase
+import com.example.mobile_hw3.roomDb.User
+import com.example.mobile_hw3.roomDb.UserDatabase
 import com.example.mobile_hw3.viewModel.NoteViewModel
 import com.example.mobile_hw3.viewModel.Repository
 import androidx.core.net.toUri
-import java.nio.file.WatchEvent
 
 var imageStr: String = ""
 
@@ -76,7 +72,7 @@ class MainActivity : ComponentActivity() {
     private val db by lazy {
         Room.databaseBuilder(
             applicationContext,
-            NoteDatabase::class.java,
+            UserDatabase::class.java,
             name = "note.db"
         ).build()
     }
@@ -113,16 +109,16 @@ fun Navigation(viewModel: NoteViewModel, lifecycleOwner: LifecycleOwner) {
     var usernameState = remember {
         mutableStateOf<String>("")
     }
-    var noteList by remember {
-        mutableStateOf(listOf<Note>())
+    var userList by remember {
+        mutableStateOf(listOf<User>())
     }
-    viewModel.getNotes().observe(lifecycleOwner) {
-        noteList = it
+    viewModel.getUsers().observe(lifecycleOwner) {
+        userList = it
     }
-    if (noteList.isNotEmpty()) {
+    if (userList.isNotEmpty()) {
         Log.d("", "Loaded from note list")
-        imageUriState.value = noteList[0].noteBody.toUri()
-        usernameState.value = noteList[0].noteName
+        imageUriState.value = userList[0].image.toUri()
+        usernameState.value = userList[0].name
     }
 
     val navController = rememberNavController()
@@ -253,8 +249,8 @@ fun SettingsScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Button(onClick = {
-            val note: Note = Note(usernameState.value, imageUriState.value.toString(), 0)
-            viewModel.upsertNote(note)
+            val user: User = User(usernameState.value, imageUriState.value.toString(), 0)
+            viewModel.upsertUser(user)
         }) {
             Text(text = "set data")
         }

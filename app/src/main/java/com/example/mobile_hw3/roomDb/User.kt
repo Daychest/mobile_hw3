@@ -1,13 +1,12 @@
 package com.example.mobile_hw3.roomDb
 
-import android.net.Uri
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class Note(
-    val noteName: String,
-    val noteBody: String,
+data class User(
+    val name: String,
+    val image: String,
     @PrimaryKey
-    val noteId: Int = 0
+    val id: Int = 0
 )

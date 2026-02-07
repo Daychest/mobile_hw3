@@ -1,20 +1,12 @@
 package com.example.mobile_hw3.viewModel
 
-import androidx.room.Delete
-import androidx.room.Query
-import androidx.room.RoomDatabase
-import androidx.room.Upsert
-import com.example.mobile_hw3.roomDb.Note
-import com.example.mobile_hw3.roomDb.NoteDatabase
+import com.example.mobile_hw3.roomDb.User
+import com.example.mobile_hw3.roomDb.UserDatabase
 
-class Repository(private  val db: NoteDatabase) {
-    suspend fun upsertNote(note: Note){
-        db.dao.upsertNote(note)
+class Repository(private val db: UserDatabase) {
+    suspend fun upsertUser(user: User) {
+        db.dao.upsertNote(user)
     }
 
-    suspend fun deleteNote(note: Note){
-        db.dao.deleteNote(note)
-    }
-
-    fun getAllNotes() = db.dao.getAllNotes()
+    fun getAllUsers() = db.dao.getAllNotes()
 }
