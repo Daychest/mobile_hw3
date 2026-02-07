@@ -329,8 +329,12 @@ fun MessageCard(msg: Message, uri: Uri?, username: String) {
 
         // We toggle the isExpanded variable when we click on this Column
         Column(modifier = Modifier.clickable { isExpanded = !isExpanded }) {
+            var displayName = msg.author
+            if (username != ""){
+                displayName = username
+            }
             Text(
-                text = username,
+                text = displayName,
                 color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.titleSmall
             )
