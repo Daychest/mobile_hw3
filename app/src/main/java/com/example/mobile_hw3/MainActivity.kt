@@ -224,6 +224,8 @@ fun SettingsScreen(
     viewModel: NoteViewModel,
     lifecycleOwner: LifecycleOwner
 ) {
+
+
     val context = LocalContext.current
 
     var rememberedImageStr by remember {
