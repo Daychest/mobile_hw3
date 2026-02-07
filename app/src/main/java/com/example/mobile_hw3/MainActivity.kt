@@ -224,6 +224,13 @@ fun SettingsScreen(
     viewModel: NoteViewModel,
     lifecycleOwner: LifecycleOwner
 ) {
+    var noteList by remember {
+        mutableStateOf(listOf<Note>())
+    }
+    viewModel.getNotes().observe(lifecycleOwner){
+        noteList = it
+    }
+
 
 
     val context = LocalContext.current
@@ -231,6 +238,12 @@ fun SettingsScreen(
     var rememberedImageStr by remember {
         mutableStateOf<String>("")
     }
+    if (noteList.isNotEmpty()){
+        rememberedImageStr = noteList[0].noteBody
+    }
+
+
+
     val singleImagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
