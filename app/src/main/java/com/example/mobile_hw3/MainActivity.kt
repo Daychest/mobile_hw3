@@ -224,6 +224,7 @@ fun SettingsScreen(
     viewModel: NoteViewModel,
     lifecycleOwner: LifecycleOwner
 ) {
+    Log.d("", "SettingsScreen called")
     var noteList by remember {
         mutableStateOf(listOf<Note>())
     }
@@ -239,6 +240,7 @@ fun SettingsScreen(
         mutableStateOf<String>("")
     }
     if (noteList.isNotEmpty()){
+        Log.d("", "Loaded from note list")
         rememberedImageStr = noteList[0].noteBody
     }
 
@@ -282,6 +284,13 @@ fun SettingsScreen(
         }) {
             Text(text = "set as string")
         }
+        Button(onClick = {
+            Log.d("", "save button hit")
+            val note: Note = Note("TestName", rememberedImageStr, 0)
+            viewModel.upsertNote(note)
+        }) {
+            Text(text = "save")
+        }
 
 
 
@@ -313,7 +322,7 @@ data class Message(val author: String, val body: String)
 fun AsyncProfilePicture(str: String) {
     Log.d("", "AsyncImage triggered")
     AsyncImage(
-        model = str.toString(),
+        model = str.toUri(),
         contentDescription = "",
         modifier = Modifier
             .size(40.dp)
