@@ -22,7 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.example.mobile_hw3.ui.theme.Mobile_hw3Theme
 import android.net.Uri
-import android.util.Log
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
@@ -60,12 +59,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
 import com.example.mobile_hw3.roomDb.User
 import com.example.mobile_hw3.roomDb.UserDatabase
-import com.example.mobile_hw3.viewModel.NoteViewModel
+import com.example.mobile_hw3.viewModel.UserViewModel
 import com.example.mobile_hw3.viewModel.Repository
 import androidx.core.net.toUri
-
-var imageStr: String = ""
-
 
 class MainActivity : ComponentActivity() {
 
@@ -73,14 +69,14 @@ class MainActivity : ComponentActivity() {
         Room.databaseBuilder(
             applicationContext,
             UserDatabase::class.java,
-            name = "note.db"
+            name = "user.db"
         ).build()
     }
-    private val viewModel by viewModels<NoteViewModel>(
+    private val viewModel by viewModels<UserViewModel>(
         factoryProducer = {
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return NoteViewModel(Repository(db)) as T
+                    return UserViewModel(Repository(db)) as T
                 }
             }
         }
@@ -102,7 +98,7 @@ const val messageScreenRoute = "messageScreen"
 const val settingsScreenRoute = "settingsScreen"
 
 @Composable
-fun Navigation(viewModel: NoteViewModel, lifecycleOwner: LifecycleOwner) {
+fun Navigation(viewModel: UserViewModel, lifecycleOwner: LifecycleOwner) {
     var imageUriState = remember {
         mutableStateOf<Uri?>(null)
     }
@@ -116,7 +112,6 @@ fun Navigation(viewModel: NoteViewModel, lifecycleOwner: LifecycleOwner) {
         userList = it
     }
     if (userList.isNotEmpty()) {
-        Log.d("", "Loaded from note list")
         imageUriState.value = userList[0].image.toUri()
         usernameState.value = userList[0].name
     }
@@ -222,7 +217,7 @@ fun MessageScreen(
 @Composable
 fun SettingsScreen(
     navController: NavController,
-    viewModel: NoteViewModel,
+    viewModel: UserViewModel,
     imageUriState: MutableState<Uri?>,
     usernameState: MutableState<String>
 ) {
@@ -286,7 +281,6 @@ data class Message(val author: String, val body: String)
 
 @Composable
 fun AsyncProfilePicture(uri: Uri?) {
-    Log.d("", "AsyncImage triggered")
     AsyncImage(
         model = uri,
         contentDescription = "",
